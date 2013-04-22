@@ -16,5 +16,5 @@ License Information
 The hardware is released under [Creative Commons Share-alike 3.0](http://creativecommons.org/licenses/by-sa/3.0/).
 The firmware is based off of:
 * [USBtiny](http://dicks.home.xs4all.nl/avr/usbtiny/index.html) by Dick Steefland
-* [USBtinyISP](http://www.ladyada.net/make/usbtinyisp/) by Limor Fried and is a collaboration with Limor Friend currently.
+* [USBtinyISP](http://www.ladyada.net/make/usbtinyisp/) by Limor Fried and is a collaboration with Limor Fried currently.
  
