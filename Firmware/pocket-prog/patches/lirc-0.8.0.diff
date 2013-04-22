@@ -1,0 +1,29 @@
+diff -pu lirc-0.8.0/drivers/lirc_igorplugusb/lirc_igorplugusb.c.orig lirc-0.8.0/drivers/lirc_igorplugusb/lirc_igorplugusb.c
+--- lirc-0.8.0/drivers/lirc_igorplugusb/lirc_igorplugusb.c.orig	2005-03-21 15:39:38.000000000 +0100
++++ lirc-0.8.0/drivers/lirc_igorplugusb/lirc_igorplugusb.c	2006-12-13 00:44:23.000000000 +0100
+@@ -110,7 +110,7 @@
+ #define ADDITIONAL_LIRC_BYTES   2
+ 
+ /* times to poll per second */
+-#define SAMPLE_RATE             10
++#define SAMPLE_RATE             100
+ 
+ 
+ /**** Igor's USB Request Codes */
+@@ -373,6 +373,7 @@ static int usb_remote_poll(void* data, s
+ 			/* 1 Igor-tick = 85.333333 us */
+ 			code = (unsigned int)ir->buf_in[i] * 85 
+ 				+ (unsigned int)ir->buf_in[i]/3;
++			ir->last_time.tv_usec += code;
+ 			if(ir->in_space)
+ 				code |= PULSE_BIT;
+ 			lirc_buffer_write_n(buf, (unsigned char*)&code, 1);  
+@@ -615,7 +616,7 @@ static struct usb_device_id usb_remote_i
+ };
+ 
+ static struct usb_driver usb_remote_driver = {
+-	.owner =	THIS_MODULE,
++	/* .owner =	THIS_MODULE, */
+ 	.name =		DRIVER_NAME,
+ 	.probe =	usb_remote_probe,
+ 	.disconnect =	usb_remote_disconnect,
