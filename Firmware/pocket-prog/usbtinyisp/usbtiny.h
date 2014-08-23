@@ -12,7 +12,7 @@
 // bit numbers:
 #define	USBTINY_PORT			D
 #define	USBTINY_DPLUS			2
-#define	USBTINY_DMINUS			4
+#define	USBTINY_DMINUS			3
 
 // The D+ signal should be connected to an interrupt input to trigger an
 // interrupt at the start of a packet. When you use the same pin for the
@@ -23,7 +23,7 @@
 
 // Optional definition of the I/O pin to control the 1K5 pullup of the
 // D- signal. This will force a reconnect after RESET. (+4 bytes)
-#define	USBTINY_DMINUS_PULLUP		(D,3)
+#define	USBTINY_DMINUS_PULLUP		(D,6)
 
 // Optional definition of the I/O pin to drive the "USB OK" LED, that
 // will turn on when the host has assigned a device address. (+6 bytes)
@@ -31,7 +31,7 @@
 
 // The power requirement of the USB device in mA, or 0 when the device
 // is not bus powered:
-#define	USBTINY_MAX_POWER		80
+#define	USBTINY_MAX_POWER		100
 
 // The USB vendor and device IDs. These values should be unique for
 // every distinct device. You can get your own vendor ID from the USB
@@ -40,19 +40,19 @@
 // www.voti.nl or www.mecanique.co.uk, or be naughty and use something
 // else, like for instance vendor ID 0x6666, which is registered as
 // "Prototype product Vendor ID".
-// This application is compatible with the IgorPlug-USB LIRC device
-// (http://www.cesko.host.sk/IgorPlugUSB/IgorPlug-USB%20(AVR)_eng.htm),
-// so we use the VID/PID pair of that device:
-#define	USBTINY_VENDOR_ID		0x03eb	// IgorPlug-USB
-#define	USBTINY_DEVICE_ID		0x0002	// IgorPlug-USB
+// The USBtinyISP project (http://www.ladyada.net/make/usbtinyisp/) has
+// allocated an official VID/PID pair for USBtiny. Since these IDs are
+// supported by avrdude since version 5.5, we use them here as well:
+#define	USBTINY_VENDOR_ID		0x1781	// USBtinyISP
+#define	USBTINY_DEVICE_ID		0x0C9F	// USBtinyISP
 
 // The version of the device as a 16-bit number: 256*major + minor.
 #define	USBTINY_DEVICE_VERSION		0x107
 
 // The following optional macros may be used as an identification of
 // your device. Undefine them when you run out of flash space.
-#define	USBTINY_VENDOR_NAME		"Dick Streefland"
-#define	USBTINY_DEVICE_NAME		"USBtiny IR/LCD"
+//#define	USBTINY_VENDOR_NAME		"Dick Streefland"
+#define	USBTINY_DEVICE_NAME		"USBtinyISP"
 #undef	USBTINY_SERIAL
 
 // Define the device class, subclass and protocol. Device class 0xff
@@ -88,7 +88,7 @@
 
 // Set the macro USBTINY_ENDPOINT to 1 to add an additional endpoint,
 // according to the values of the three other macros.
-#define	USBTINY_ENDPOINT		1
+#define	USBTINY_ENDPOINT		0
 #define	USBTINY_ENDPOINT_ADDRESS	0x81	// IN endpoint #1
 #define	USBTINY_ENDPOINT_TYPE		0x00	// control transfer type
 #define	USBTINY_ENDPOINT_INTERVAL	0	// ignored

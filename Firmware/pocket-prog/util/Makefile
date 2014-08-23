@@ -1,7 +1,7 @@
 # ======================================================================
 # Build a Python wrapper for libusb.
 #
-# Copyright (C) 2006 Dick Streefland
+# Copyright 2006-2010 Dick Streefland
 #
 # This is free software, licensed under the terms of the GNU General
 # Public License as published by the Free Software Foundation.
@@ -19,5 +19,5 @@ clobber:	clean
 
 _libusb.so:	libusb.i
 	swig -python -D'__attribute__(x)=' -w302,454 -I/usr/include $<
-	gcc -s -shared -I$(PYTHONINC) -o _libusb.so libusb_wrap.c -lusb
+	gcc -s -shared -fPIC -I$(PYTHONINC) -o _libusb.so libusb_wrap.c -lusb
 	@rm -f libusb_wrap.c

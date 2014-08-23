@@ -1,5 +1,9 @@
 // ======================================================================
-// Control a parallel port AVR programmer (avrdude type "bsd") via USB.
+// USB AVR programmer and SPI interface
+//
+// http://www.ladyada.net/make/usbtinyisp/
+//
+// This code works for both v1.0 and v2.0 devices.
 //
 // Copyright 2006-2010 Dick Streefland
 //
@@ -8,16 +12,17 @@
 // ======================================================================
 
 #include <avr/io.h>
+#include "def.h"
 #include "usb.h"
 
 enum
 {
 	// Generic requests
 	USBTINY_ECHO,		// echo test
-	USBTINY_READ,		// read byte (wIndex:address)
-	USBTINY_WRITE,		// write byte (wIndex:address, wValue:value)
-	USBTINY_CLR,		// clear bit (wIndex:address, wValue:bitno)
-	USBTINY_SET,		// set bit (wIndex:address, wValue:bitno)
+	USBTINY_READ,		// read byte
+	USBTINY_WRITE,		// write byte
+	USBTINY_CLR,		// clear bit 
+	USBTINY_SET,		// set bit
 	// Programming requests
 	USBTINY_POWERUP,	// apply power (wValue:SCK-period, wIndex:RESET)
 	USBTINY_POWERDOWN,	// remove power from chip
@@ -27,31 +32,30 @@ enum
 	USBTINY_FLASH_WRITE,	// write flash (wIndex:address, wValue:timeout)
 	USBTINY_EEPROM_READ,	// read eeprom (wIndex:address)
 	USBTINY_EEPROM_WRITE,	// write eeprom (wIndex:address, wValue:timeout)
+	USBTINY_DDRWRITE,	// set port direction
+	USBTINY_SPI1		// a single SPI command
 };
 
 // ----------------------------------------------------------------------
-// Programmer output pins:
-//	LED	PB0	(D0)
-//	VCC	PB1	(D1)
-//	VCC	PB2	(D2)
-//	VCC	PB3	(D3)
-//	RESET	PB5	(D5)
-//	SCK	PB6	(D6)
-//	MOSI	PB7	(D7)
+// I/O pins:
 // ----------------------------------------------------------------------
 #define	PORT		PORTB
 #define	DDR		DDRB
-#define	POWER_MASK	0x0f
-#define	RESET_MASK	(1 << 5)
-#define	SCK_MASK	(1 << 6)
-#define	MOSI_MASK	(1 << 7)
+#define	PIN		PINB
 
-// ----------------------------------------------------------------------
-// Programmer input pins:
-//	MISO	PD3	(ACK)
-// ----------------------------------------------------------------------
-#define	PIN		PIND
-#define	MISO_MASK	(1 << 3)
+#define	LED		PB0		// output
+#define	RESET		PB4		// output
+#define	MOSI		PB5		// output
+#define	MISO		PB6		// input
+#define	SCK		PB7		// output
+
+#define	LED_MASK	_BV(LED)
+#define	RESET_MASK	_BV(RESET)
+#define	MOSI_MASK	_BV(MOSI)
+#define	MISO_MASK	_BV(MISO)
+#define	SCK_MASK	_BV(SCK)
+
+#define	BUFFEN		(D,4)		// output, active low
 
 // ----------------------------------------------------------------------
 // Local data
@@ -83,15 +87,15 @@ static	inline	void	delay ( void )
 // ----------------------------------------------------------------------
 // Issue one SPI command.
 // ----------------------------------------------------------------------
-static	void	spi ( byte_t* cmd, byte_t* res )
+static	void	spi ( byte_t* cmd, byte_t* res, byte_t n )
 {
-	byte_t	i;
 	byte_t	c;
 	byte_t	r;
 	byte_t	mask;
 
-	for	( i = 0; i < 4; i++ )
+	while	( n != 0 )
 	{
+		n--;
 		c = *cmd++;
 		r = 0;
 		for	( mask = 0x80; mask; mask >>= 1 )
@@ -134,7 +138,7 @@ static	void	spi_rw ( void )
 	}
 	cmd[1] = a >> 9;
 	cmd[2] = a >> 1;
-	spi( cmd, res );
+	spi( cmd, res, 4 );
 }
 
 // ----------------------------------------------------------------------
@@ -144,7 +148,6 @@ extern	byte_t	usb_setup ( byte_t data[8] )
 {
 	byte_t	bit;
 	byte_t	mask;
-	byte_t*	addr;
 	byte_t	req;
 
 	// Generic requests
@@ -153,48 +156,52 @@ extern	byte_t	usb_setup ( byte_t data[8] )
 	{
 		return 8;
 	}
-	addr = (byte_t*) (int) data[4];
 	if	( req == USBTINY_READ )
 	{
-		data[0] = *addr;
+		data[0] = PIN;
 		return 1;
 	}
 	if	( req == USBTINY_WRITE )
 	{
-		*addr = data[2];
+		PORT = data[2];
 		return 0;
 	}
 	bit = data[2] & 7;
 	mask = 1 << bit;
 	if	( req == USBTINY_CLR )
 	{
-		*addr &= ~ mask;
+		PORT &= ~ mask;
 		return 0;
 	}
 	if	( req == USBTINY_SET )
 	{
-		*addr |= mask;
+		PORT |= mask;
 		return 0;
+	}
+	if	( req == USBTINY_DDRWRITE )
+	{
+		DDR = data[2];
 	}
 
 	// Programming requests
 	if	( req == USBTINY_POWERUP )
 	{
 		sck_period = data[2];
-		mask = POWER_MASK;
+		mask = LED_MASK;
 		if	( data[4] )
 		{
 			mask |= RESET_MASK;
 		}
-		DDR  = 0xff;
+		CLR(BUFFEN);
+		DDR  = LED_MASK | RESET_MASK | SCK_MASK | MOSI_MASK;
 		PORT = mask;
 		return 0;
 	}
 	if	( req == USBTINY_POWERDOWN )
 	{
-		PORT |= RESET_MASK;
-		PORT = 0x00;
 		DDR  = 0x00;
+		PORT = 0x00;
+		SET(BUFFEN);
 		return 0;
 	}
 	if	( ! PORT )
@@ -203,8 +210,13 @@ extern	byte_t	usb_setup ( byte_t data[8] )
 	}
 	if	( req == USBTINY_SPI )
 	{
-		spi( data + 2, data + 0 );
+		spi( data + 2, data + 0, 4 );
 		return 4;
+	}
+	if	( req == USBTINY_SPI1 )
+	{
+		spi( data + 2, data + 0, 1 );
+		return 1;
 	}
 	if	( req == USBTINY_POLL_BYTES )
 	{
@@ -268,7 +280,7 @@ extern	void	usb_out ( byte_t* data, byte_t len )
 		cmd[0] ^= 0x60;	// turn write into read
 		for	( usec = 0; usec < timeout; usec += 32 * sck_period )
 		{	// when timeout > 0, poll until byte is written
-			spi( cmd, res );
+			spi( cmd, res, 4 );
 			r = res[3];
 			if	( r == cmd[3] && r != poll1 && r != poll2 )
 			{
@@ -283,6 +295,8 @@ extern	void	usb_out ( byte_t* data, byte_t len )
 // ----------------------------------------------------------------------
 extern	int	main ( void )
 {
+	SET(BUFFEN);
+	OUTPUT(BUFFEN);
 	usb_init();
 	for	( ;; )
 	{

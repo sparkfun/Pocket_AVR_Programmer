@@ -1,0 +1,20 @@
+diff -pu lirc-0.8.2/drivers/lirc_igorplugusb/lirc_igorplugusb.c.orig lirc-0.8.2/drivers/lirc_igorplugusb/lirc_igorplugusb.c
+--- lirc-0.8.2/drivers/lirc_igorplugusb/lirc_igorplugusb.c.orig	2007-02-13 08:28:38.000000000 +0100
++++ lirc-0.8.2/drivers/lirc_igorplugusb/lirc_igorplugusb.c	2008-01-15 14:47:04.000000000 +0100
+@@ -110,7 +110,7 @@
+ #define ADDITIONAL_LIRC_BYTES   2
+ 
+ /* times to poll per second */
+-#define SAMPLE_RATE             10
++#define SAMPLE_RATE             100
+ 
+ 
+ /**** Igor's USB Request Codes */
+@@ -373,6 +373,7 @@ static int usb_remote_poll(void* data, s
+ 			/* 1 Igor-tick = 85.333333 us */
+ 			code = (unsigned int)ir->buf_in[i] * 85 
+ 				+ (unsigned int)ir->buf_in[i]/3;
++			ir->last_time.tv_usec += code;
+ 			if(ir->in_space)
+ 				code |= PULSE_BIT;
+ 			lirc_buffer_write_n(buf, (unsigned char*)&code, 1);  

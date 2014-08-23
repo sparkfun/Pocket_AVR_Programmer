@@ -1,7 +1,7 @@
-diff -pu avrdude-5.1/Makefile.am.orig avrdude-5.1/Makefile.am
---- avrdude-5.1/Makefile.am.orig	2006-01-13 00:13:50.000000000 +0100
-+++ avrdude-5.1/Makefile.am	2006-02-11 22:09:53.000000000 +0100
-@@ -62,6 +62,8 @@ avrdude_SOURCES = \
+diff -pu avrdude-5.4/Makefile.am.orig avrdude-5.4/Makefile.am
+--- avrdude-5.4/Makefile.am.orig	2007-01-25 21:51:11.000000000 +0100
++++ avrdude-5.4/Makefile.am	2008-01-15 14:08:59.000000000 +0100
+@@ -86,6 +86,8 @@ libavrdude_a_SOURCES = \
  	bitbang.h \
  	butterfly.c \
  	butterfly.h \
@@ -10,81 +10,60 @@ diff -pu avrdude-5.1/Makefile.am.orig avrdude-5.1/Makefile.am
  	config.c \
  	config.h \
  	confwin.c \
-diff -pu avrdude-5.1/Makefile.in.orig avrdude-5.1/Makefile.in
---- avrdude-5.1/Makefile.in.orig	2006-01-23 22:45:25.000000000 +0100
-+++ avrdude-5.1/Makefile.in	2006-03-25 23:05:12.000000000 +0100
-@@ -88,17 +88,17 @@ am_avrdude_OBJECTS = avrdude-config_gram
- 	avrdude-lexer.$(OBJEXT) avrdude-avr.$(OBJEXT) \
- 	avrdude-avr910.$(OBJEXT) avrdude-avrpart.$(OBJEXT) \
- 	avrdude-bitbang.$(OBJEXT) avrdude-butterfly.$(OBJEXT) \
--	avrdude-config.$(OBJEXT) avrdude-confwin.$(OBJEXT) \
--	avrdude-crc16.$(OBJEXT) avrdude-fileio.$(OBJEXT) \
--	avrdude-jtagmkI.$(OBJEXT) avrdude-jtagmkII.$(OBJEXT) \
--	avrdude-lists.$(OBJEXT) avrdude-main.$(OBJEXT) \
--	avrdude-par.$(OBJEXT) avrdude-pgm.$(OBJEXT) \
--	avrdude-ppi.$(OBJEXT) avrdude-ppiwin.$(OBJEXT) \
--	avrdude-safemode.$(OBJEXT) avrdude-serbb_posix.$(OBJEXT) \
--	avrdude-serbb_win32.$(OBJEXT) avrdude-ser_posix.$(OBJEXT) \
--	avrdude-ser_win32.$(OBJEXT) avrdude-stk500.$(OBJEXT) \
--	avrdude-stk500v2.$(OBJEXT) avrdude-term.$(OBJEXT) \
--	avrdude-usb_libusb.$(OBJEXT)
-+	avrdude-usbtiny.$(OBJEXT) avrdude-config.$(OBJEXT) \
-+	avrdude-confwin.$(OBJEXT) avrdude-crc16.$(OBJEXT) \
-+	avrdude-fileio.$(OBJEXT) avrdude-jtagmkI.$(OBJEXT) \
-+	avrdude-jtagmkII.$(OBJEXT) avrdude-lists.$(OBJEXT) \
-+	avrdude-main.$(OBJEXT) avrdude-par.$(OBJEXT) \
-+	avrdude-pgm.$(OBJEXT) avrdude-ppi.$(OBJEXT) \
-+	avrdude-ppiwin.$(OBJEXT) avrdude-safemode.$(OBJEXT) \
-+	avrdude-serbb_posix.$(OBJEXT) avrdude-serbb_win32.$(OBJEXT) \
-+	avrdude-ser_posix.$(OBJEXT) avrdude-ser_win32.$(OBJEXT) \
-+	avrdude-stk500.$(OBJEXT) avrdude-stk500v2.$(OBJEXT) \
-+	avrdude-term.$(OBJEXT) avrdude-usb_libusb.$(OBJEXT)
- avrdude_OBJECTS = $(am_avrdude_OBJECTS)
- avrdude_LDADD = $(LDADD)
- DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
-@@ -271,6 +271,8 @@ avrdude_SOURCES = \
- 	bitbang.h \
- 	butterfly.c \
- 	butterfly.h \
+diff -pu avrdude-5.4/Makefile.in.orig avrdude-5.4/Makefile.in
+--- avrdude-5.4/Makefile.in.orig	2007-05-16 23:47:13.000000000 +0200
++++ avrdude-5.4/Makefile.in	2008-01-15 14:08:59.000000000 +0100
+@@ -105,6 +105,7 @@ am_libavrdude_a_OBJECTS = libavrdude_a-c
+ 	libavrdude_a-stk500v2.$(OBJEXT) \
+ 	libavrdude_a-stk500generic.$(OBJEXT) \
+ 	libavrdude_a-term.$(OBJEXT) libavrdude_a-usbasp.$(OBJEXT) \
++ 	libavrdude_a-usbtiny.$(OBJEXT) \
+ 	libavrdude_a-usb_libusb.$(OBJEXT) \
+ 	libavrdude_a-update.$(OBJEXT)
+ libavrdude_a_OBJECTS = $(am_libavrdude_a_OBJECTS)
+@@ -344,6 +345,8 @@ libavrdude_a_SOURCES = \
+ 	usbasp.c \
+ 	usbasp.h \
+ 	usbdevs.h \
 +	usbtiny.c \
 +	usbtiny.h \
- 	config.c \
- 	config.h \
- 	confwin.c \
-@@ -445,6 +447,7 @@ distclean-compile:
- @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/avrdude-stk500v2.Po@am__quote@
- @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/avrdude-term.Po@am__quote@
- @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/avrdude-usb_libusb.Po@am__quote@
-+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/avrdude-usbtiny.Po@am__quote@
+ 	usb_libusb.c \
+ 	update.h \
+ 	update.c
+@@ -489,6 +492,7 @@ distclean-compile:
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libavrdude_a-update.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libavrdude_a-usb_libusb.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libavrdude_a-usbasp.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libavrdude_a-usbtiny.Po@am__quote@
  
  .c.o:
  @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@@ -558,6 +561,20 @@ avrdude-butterfly.obj: butterfly.c
+@@ -910,6 +914,20 @@ libavrdude_a-usbasp.obj: usbasp.c
  @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
- @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(avrdude_CPPFLAGS) $(CPPFLAGS) $(avrdude_CFLAGS) $(CFLAGS) -c -o avrdude-butterfly.obj `if test -f 'butterfly.c'; then $(CYGPATH_W) 'butterfly.c'; else $(CYGPATH_W) '$(srcdir)/butterfly.c'; fi`
+ @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libavrdude_a_CPPFLAGS) $(CPPFLAGS) $(libavrdude_a_CFLAGS) $(CFLAGS) -c -o libavrdude_a-usbasp.obj `if test -f 'usbasp.c'; then $(CYGPATH_W) 'usbasp.c'; else $(CYGPATH_W) '$(srcdir)/usbasp.c'; fi`
  
-+avrdude-usbtiny.o: usbtiny.c
-+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(avrdude_CPPFLAGS) $(CPPFLAGS) $(avrdude_CFLAGS) $(CFLAGS) -MT avrdude-usbtiny.o -MD -MP -MF "$(DEPDIR)/avrdude-usbtiny.Tpo" -c -o avrdude-usbtiny.o `test -f 'usbtiny.c' || echo '$(srcdir)/'`usbtiny.c; \
-+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/avrdude-usbtiny.Tpo" "$(DEPDIR)/avrdude-usbtiny.Po"; else rm -f "$(DEPDIR)/avrdude-usbtiny.Tpo"; exit 1; fi
-+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='usbtiny.c' object='avrdude-usbtiny.o' libtool=no @AMDEPBACKSLASH@
++libavrdude_a-usbtiny.o: usbtiny.c
++@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libavrdude_a_CPPFLAGS) $(CPPFLAGS) $(libavrdude_a_CFLAGS) $(CFLAGS) -MT libavrdude_a-usbtiny.o -MD -MP -MF "$(DEPDIR)/libavrdude_a-usbtiny.Tpo" -c -o libavrdude_a-usbtiny.o `test -f 'usbtiny.c' || echo '$(srcdir)/'`usbtiny.c; \
++@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libavrdude_a-usbtiny.Tpo" "$(DEPDIR)/libavrdude_a-usbtiny.Po"; else rm -f "$(DEPDIR)/libavrdude_a-usbtiny.Tpo"; exit 1; fi
++@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='usbtiny.c' object='libavrdude_a-usbtiny.o' libtool=no @AMDEPBACKSLASH@
 +@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(avrdude_CPPFLAGS) $(CPPFLAGS) $(avrdude_CFLAGS) $(CFLAGS) -c -o avrdude-usbtiny.o `test -f 'usbtiny.c' || echo '$(srcdir)/'`usbtiny.c
++@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libavrdude_a_CPPFLAGS) $(CPPFLAGS) $(libavrdude_a_CFLAGS) $(CFLAGS) -c -o libavrdude_a-usbtiny.o `test -f 'usbtiny.c' || echo '$(srcdir)/'`usbtiny.c
 +
-+avrdude-usbtiny.obj: usbtiny.c
-+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(avrdude_CPPFLAGS) $(CPPFLAGS) $(avrdude_CFLAGS) $(CFLAGS) -MT avrdude-usbtiny.obj -MD -MP -MF "$(DEPDIR)/avrdude-usbtiny.Tpo" -c -o avrdude-usbtiny.obj `if test -f 'usbtiny.c'; then $(CYGPATH_W) 'usbtiny.c'; else $(CYGPATH_W) '$(srcdir)/usbtiny.c'; fi`; \
-+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/avrdude-usbtiny.Tpo" "$(DEPDIR)/avrdude-usbtiny.Po"; else rm -f "$(DEPDIR)/avrdude-usbtiny.Tpo"; exit 1; fi
-+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='usbtiny.c' object='avrdude-usbtiny.obj' libtool=no @AMDEPBACKSLASH@
++libavrdude_a-usbtiny.obj: usbtiny.c
++@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libavrdude_a_CPPFLAGS) $(CPPFLAGS) $(libavrdude_a_CFLAGS) $(CFLAGS) -MT libavrdude_a-usbtiny.obj -MD -MP -MF "$(DEPDIR)/libavrdude_a-usbtiny.Tpo" -c -o libavrdude_a-usbtiny.obj `if test -f 'usbtiny.c'; then $(CYGPATH_W) 'usbtiny.c'; else $(CYGPATH_W) '$(srcdir)/usbtiny.c'; fi`; \
++@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libavrdude_a-usbtiny.Tpo" "$(DEPDIR)/libavrdude_a-usbtiny.Po"; else rm -f "$(DEPDIR)/libavrdude_a-usbtiny.Tpo"; exit 1; fi
++@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='usbtiny.c' object='libavrdude_a-usbtiny.obj' libtool=no @AMDEPBACKSLASH@
 +@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(avrdude_CPPFLAGS) $(CPPFLAGS) $(avrdude_CFLAGS) $(CFLAGS) -c -o avrdude-usbtiny.obj `if test -f 'usbtiny.c'; then $(CYGPATH_W) 'usbtiny.c'; else $(CYGPATH_W) '$(srcdir)/usbtiny.c'; fi`
++@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libavrdude_a_CPPFLAGS) $(CPPFLAGS) $(libavrdude_a_CFLAGS) $(CFLAGS) -c -o libavrdude_a-usbtiny.obj `if test -f 'usbtiny.c'; then $(CYGPATH_W) 'usbtiny.c'; else $(CYGPATH_W) '$(srcdir)/usbtiny.c'; fi`
 +
- avrdude-config.o: config.c
- @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(avrdude_CPPFLAGS) $(CPPFLAGS) $(avrdude_CFLAGS) $(CFLAGS) -MT avrdude-config.o -MD -MP -MF "$(DEPDIR)/avrdude-config.Tpo" -c -o avrdude-config.o `test -f 'config.c' || echo '$(srcdir)/'`config.c; \
- @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/avrdude-config.Tpo" "$(DEPDIR)/avrdude-config.Po"; else rm -f "$(DEPDIR)/avrdude-config.Tpo"; exit 1; fi
-diff -pu avrdude-5.1/avrdude.conf.in.orig avrdude-5.1/avrdude.conf.in
---- avrdude-5.1/avrdude.conf.in.orig	2006-01-17 22:01:25.000000000 +0100
-+++ avrdude-5.1/avrdude.conf.in	2006-02-11 22:09:53.000000000 +0100
-@@ -537,6 +537,12 @@ programmer
-   miso  = 7;
+ libavrdude_a-usb_libusb.o: usb_libusb.c
+ @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libavrdude_a_CPPFLAGS) $(CPPFLAGS) $(libavrdude_a_CFLAGS) $(CFLAGS) -MT libavrdude_a-usb_libusb.o -MD -MP -MF "$(DEPDIR)/libavrdude_a-usb_libusb.Tpo" -c -o libavrdude_a-usb_libusb.o `test -f 'usb_libusb.c' || echo '$(srcdir)/'`usb_libusb.c; \
+ @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libavrdude_a-usb_libusb.Tpo" "$(DEPDIR)/libavrdude_a-usb_libusb.Po"; else rm -f "$(DEPDIR)/libavrdude_a-usb_libusb.Tpo"; exit 1; fi
+diff -pu avrdude-5.4/avrdude.conf.in.orig avrdude-5.4/avrdude.conf.in
+--- avrdude-5.4/avrdude.conf.in.orig	2007-05-16 23:29:36.000000000 +0200
++++ avrdude-5.4/avrdude.conf.in	2008-01-15 14:08:59.000000000 +0100
+@@ -779,6 +779,12 @@ programmer
+   miso  = 8;
  ;
  
 +programmer
@@ -96,10 +75,10 @@ diff -pu avrdude-5.1/avrdude.conf.in.orig avrdude-5.1/avrdude.conf.in
  #
  # PART DEFINITIONS
  #
-diff -pu avrdude-5.1/config_gram.y.orig avrdude-5.1/config_gram.y
---- avrdude-5.1/config_gram.y.orig	2005-11-25 07:14:06.000000000 +0100
-+++ avrdude-5.1/config_gram.y	2006-02-11 22:09:53.000000000 +0100
-@@ -40,6 +40,7 @@
+diff -pu avrdude-5.4/config_gram.y.orig avrdude-5.4/config_gram.y
+--- avrdude-5.4/config_gram.y.orig	2007-02-02 22:48:19.000000000 +0100
++++ avrdude-5.4/config_gram.y	2008-01-15 14:08:59.000000000 +0100
+@@ -45,6 +45,7 @@
  #include "avr.h"
  #include "jtagmkI.h"
  #include "jtagmkII.h"
@@ -107,15 +86,15 @@ diff -pu avrdude-5.1/config_gram.y.orig avrdude-5.1/config_gram.y
  
  #if defined(WIN32NATIVE)
  #define strtok_r( _s, _sep, _lasts ) \
-@@ -125,6 +126,7 @@ static int parse_cmdbits(OPCODE * op);
- %token K_VCC
- %token K_VFYLED
+@@ -72,6 +73,7 @@ static int parse_cmdbits(OPCODE * op);
  %token K_WRITEPAGE
+ %token K_CHIP_ERASE
+ %token K_PGM_ENABLE
 +%token K_USBTINY
  
- %token K_NO
- %token K_YES
-@@ -372,6 +374,12 @@ prog_parm :
+ %token K_MEMORY
+ 
+@@ -481,6 +483,12 @@ prog_parm :
      }
    } |
  
@@ -128,25 +107,25 @@ diff -pu avrdude-5.1/config_gram.y.orig avrdude-5.1/config_gram.y
    K_DESC TKN_EQUAL TKN_STRING {
      strncpy(current_prog->desc, $3->value.string, PGM_DESCLEN);
      current_prog->desc[PGM_DESCLEN-1] = 0;
-diff -pu avrdude-5.1/lexer.l.orig avrdude-5.1/lexer.l
---- avrdude-5.1/lexer.l.orig	2005-11-25 07:14:06.000000000 +0100
-+++ avrdude-5.1/lexer.l	2006-02-11 22:09:53.000000000 +0100
-@@ -172,6 +172,7 @@ stk500           { yylval=NULL; return K
- stk500v2         { yylval=NULL; return K_STK500V2; }
+diff -pu avrdude-5.4/lexer.l.orig avrdude-5.4/lexer.l
+--- avrdude-5.4/lexer.l.orig	2007-01-24 23:43:46.000000000 +0100
++++ avrdude-5.4/lexer.l	2008-01-15 14:08:59.000000000 +0100
+@@ -183,6 +183,7 @@ stk500v2         { yylval=NULL; return K
+ stk500generic    { yylval=NULL; return K_STK500GENERIC; }
  stk500_devcode   { yylval=NULL; return K_STK500_DEVCODE; }
  type             { yylval=NULL; return K_TYPE; }
 +usbtiny          { yylval=NULL; return K_USBTINY; }
  vcc              { yylval=NULL; return K_VCC; }
  vfyled           { yylval=NULL; return K_VFYLED; }
  
-diff -pu /dev/null avrdude-5.1/usbtiny.c
---- /dev/null	2006-01-16 00:01:55.000000000 +0100
-+++ avrdude-5.1/usbtiny.c	2006-02-25 20:51:32.000000000 +0100
-@@ -0,0 +1,414 @@
+diff -pu /dev/null avrdude-5.4/usbtiny.c
+--- /dev/null	2007-11-20 19:44:18.000000000 +0100
++++ avrdude-5.4/usbtiny.c	2008-01-15 14:15:56.000000000 +0100
+@@ -0,0 +1,363 @@
 +// ----------------------------------------------------------------------
 +// Driver for the "usbtiny" programmer.
 +//
-+// Copyright (C) 2006 Dick Streefland
++// Copyright 2006-2008 Dick Streefland
 +//
 +// This is free software, licensed under the terms of the GNU General
 +// Public License as published by the Free Software Foundation.
@@ -157,8 +136,9 @@ diff -pu /dev/null avrdude-5.1/usbtiny.c
 +#include "pgm.h"
 +#include "avr.h"
 +
-+#define	USBDEV_VENDOR	0x1964
-+#define	USBDEV_PRODUCT	0x0001
++// VID/PID assigned to USBtiny (http://www.ladyada.net/make/usbtinyisp/)
++#define	USBTINY_VENDOR	0x1781
++#define	USBTINY_PRODUCT	0x0C9F
 +
 +enum
 +{
@@ -203,10 +183,6 @@ diff -pu /dev/null avrdude-5.1/usbtiny.c
 +static	usb_dev_handle*	usb_handle;
 +static	int		sck_period;
 +static	int		chunk_size;
-+static	AVRMEM*		cache_mem;
-+static	ulong_t		cache_base;
-+static	byte_t		cache_buf[CHUNK_SIZE];
-+static	int		cache_disable;
 +
 +// ----------------------------------------------------------------------
 +
@@ -279,8 +255,8 @@ diff -pu /dev/null avrdude-5.1/usbtiny.c
 +	{
 +		for	( dev = bus->devices; dev; dev = dev->next )
 +		{
-+			if	(  dev->descriptor.idVendor == USBDEV_VENDOR
-+				&& dev->descriptor.idProduct == USBDEV_PRODUCT
++			if	(  dev->descriptor.idVendor == USBTINY_VENDOR
++				&& dev->descriptor.idProduct == USBTINY_PRODUCT
 +				)
 +			{
 +				usb_handle = usb_open( dev );
@@ -296,7 +272,7 @@ diff -pu /dev/null avrdude-5.1/usbtiny.c
 +		}
 +	}
 +	fprintf( stderr, "Could not find USB device 0x%x/0x%x\n",
-+		USBDEV_VENDOR, USBDEV_PRODUCT );
++		USBTINY_VENDOR, USBTINY_PRODUCT );
 +	return -1;
 +}
 +
@@ -362,7 +338,7 @@ diff -pu /dev/null avrdude-5.1/usbtiny.c
 +	{	// no response, RESET and try again
 +		usb_control( USBTINY_POWERUP, sck_period, RESET_HIGH );
 +		usb_control( USBTINY_POWERUP, sck_period, RESET_LOW );
-+		usleep( 20000 );
++		usleep( 50000 );
 +		if	( ! usbtiny_avr_op( pgm, p, AVR_OP_PGM_ENABLE, res ) )
 +		{	// give up
 +			return -1;
@@ -384,10 +360,9 @@ diff -pu /dev/null avrdude-5.1/usbtiny.c
 +{
 +	int	r;
 +
-+	cache_mem = NULL;
 +	memset( res, '\0', sizeof(res) );
 +	r = usb_in( USBTINY_SPI, (cmd[1] << 8) | cmd[0], (cmd[3] << 8) | cmd[2],
-+	            (char*) res, sizeof(res), 8 * sck_period );
++	            res, sizeof(res), 8 * sck_period );
 +	if	( verbose > 1 )
 +	{
 +		printf( "CMD: [%02x %02x %02x %02x] [%02x %02x %02x %02x]\n",
@@ -409,7 +384,7 @@ diff -pu /dev/null avrdude-5.1/usbtiny.c
 +	return r;
 +}
 +
-+static	void	usbtiny_display ( PROGRAMMER* pgm, char* p )
++static	void	usbtiny_display ( PROGRAMMER* pgm, const char* p )
 +{
 +}
 +
@@ -489,53 +464,6 @@ diff -pu /dev/null avrdude-5.1/usbtiny.c
 +	return n_bytes;
 +}
 +
-+static	int	usbtiny_read_byte ( PROGRAMMER* pgm, AVRPART* p, AVRMEM* m,
-+		                    ulong_t addr, byte_t* value )
-+{
-+	ulong_t	base;
-+	int	req;
-+	int	size;
-+
-+	if	( cache_disable > 0 )
-+	{
-+		return -1;	// fall back to avr_read_byte_default()
-+	}
-+	if	(  strcmp( m->desc, "flash" ) != 0
-+		&& strcmp( m->desc, "eeprom" ) != 0
-+		)
-+	{
-+		return -1;	// fall back to avr_read_byte_default()
-+	}
-+	base = addr & ~ (chunk_size - 1);
-+	if	( cache_mem != m || cache_base != base )
-+	{
-+		req = ( strcmp( m->desc, "flash" ) == 0
-+		      ? USBTINY_FLASH_READ
-+		      : USBTINY_EEPROM_READ
-+		      );
-+		size = (m->size < chunk_size ? m->size : chunk_size);
-+		if	( usb_in( req, 0, (int) base, cache_buf, size, 32 * sck_period ) != 0 )
-+		{
-+			cache_mem = NULL;
-+			return -1;
-+		}
-+		cache_mem = m;
-+		cache_base = base;
-+	}
-+	*value = cache_buf[addr - base];
-+	return 0;
-+}
-+
-+static	int	usbtiny_write_byte ( PROGRAMMER* pgm, AVRPART* p, AVRMEM* m,
-+		                     ulong_t addr, byte_t value )
-+{
-+	int	r;
-+
-+	cache_disable++;
-+	r = avr_write_byte_default( pgm, p, m, addr, value );
-+	cache_disable--;
-+	return r;
-+}
 +
 +extern	void	usbtiny_initpgm ( PROGRAMMER* pgm )
 +{
@@ -553,12 +481,12 @@ diff -pu /dev/null avrdude-5.1/usbtiny.c
 +	pgm->close		= usbtiny_close;
 +	pgm->paged_load		= usbtiny_paged_load;
 +	pgm->paged_write	= usbtiny_paged_write;
-+	pgm->read_byte		= usbtiny_read_byte;
-+	pgm->write_byte		= usbtiny_write_byte;
++	pgm->read_byte		= avr_read_byte_default;
++	pgm->write_byte		= avr_write_byte_default;
 +	pgm->set_sck_period	= usbtiny_set_sck_period;
 +}
-diff -pu /dev/null avrdude-5.1/usbtiny.h
---- /dev/null	2006-01-16 00:01:55.000000000 +0100
-+++ avrdude-5.1/usbtiny.h	2006-02-11 22:09:53.000000000 +0100
+diff -pu /dev/null avrdude-5.4/usbtiny.h
+--- /dev/null	2007-11-20 19:44:18.000000000 +0100
++++ avrdude-5.4/usbtiny.h	2008-01-15 14:08:59.000000000 +0100
 @@ -0,0 +1 @@
 +extern	void	usbtiny_initpgm ( PROGRAMMER* pgm );
