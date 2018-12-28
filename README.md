@@ -17,7 +17,7 @@ Repository Contents
 Documentation
 --------------
 * **[Hookup Guide](https://learn.sparkfun.com/tutorials/pocket-avr-programmer-hookup-guide)** - Basic hookup guide for the Pocket AVR Programmer. 
-* **[Installing an Arduino Bootloader](https://learn.sparkfun.com/tutorials/installing-an-arduino-bootloader)**  - Example of installing an Arduino bootloader on an Atmega328P-based microcontrollers (i.e. Arduino Uno and RedBoard Programmed with ARduino).
+* **[Installing an Arduino Bootloader](https://learn.sparkfun.com/tutorials/installing-an-arduino-bootloader)**  - Example of installing an Arduino bootloader on an Atmega328P-based microcontrollers (i.e. Arduino Uno and RedBoard Programmed with Arduino) through the Arduino IDE and command line using avrdude.
 
 License Information
 -------------------
