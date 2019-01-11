@@ -1,7 +1,7 @@
 // ======================================================================
 // SWIG interface description for libusb
 //
-// Copyright (C) 2006 Dick Streefland
+// Copyright 2006-2008 Dick Streefland
 //
 // This is free software, licensed under the terms of the GNU General
 // Public License as published by the Free Software Foundation.
@@ -82,7 +82,9 @@ static	int	usb_control_out ( usb_dev_handle *dev, int requesttype,
 %cstring_bounded_output( char* strbuf, 255 );
 static	void	usb_string ( usb_dev_handle* dev, int index, char* strbuf );
 
+typedef unsigned short uint16_t;
 typedef unsigned short u_int16_t;
+typedef unsigned char uint8_t;
 typedef unsigned char u_int8_t;
 
 %include usb.h

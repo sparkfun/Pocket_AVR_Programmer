@@ -2,7 +2,7 @@
 # ======================================================================
 # check.py - Check section sizes and other constraints
 #
-# Copyright (C) 2006 Dick Streefland
+# Copyright 2006-2010 Dick Streefland
 #
 # This is free software, licensed under the terms of the GNU General
 # Public License as published by the Free Software Foundation.
@@ -23,6 +23,10 @@ if len(sys.argv) > 4:
 
 max_sram = ramsize - stacksize
 
+crc4tab	= 0
+text	= 0
+data	= 0
+bss	= 0
 for line in os.popen('avr-objdump -ht ' + sys.argv[1]).readlines():
 	a = line.split()
 	if len(a) == 7:
@@ -32,11 +36,14 @@ for line in os.popen('avr-objdump -ht ' + sys.argv[1]).readlines():
 			data = int(a[2], 16)
 		if a[1] == '.bss':
 			bss = int(a[2], 16)
-	if len(a) == 5 and a[4] == 'crc4tab':
+	if len(a) >= 5 and a[-1] == 'crc4tab':
 		crc4tab = int(a[0], 16)
 print 'text: %d, data: %d, bss: %d' % (text, data, bss)
 
 status = 0
+if text == 0:
+	print 'ERROR: No code! Upgrade your binutils package or remove --gc-sections'
+	status = 1
 overflow = text + data - flashsize
 if overflow > 0:
 	print 'ERROR: Flash size limit exceeded by %d bytes.' % overflow

@@ -6,7 +6,7 @@ the Atmel ATtiny microcontrollers. Of course, it will also work on the
 ATmega series. The software is written for an AVR clocked at 12 MHz.
 At this frequency, each bit on the USB bus takes 8 clock cycles, and
 with a lot of trickery, it is possible to decode and encode the USB
-waveforms by software. The USB driver needs between 1300 and 1400
+waveforms by software. The USB driver needs approximately 1250 to 1350
 bytes of flash space (excluding the optional identification strings),
 depending on the configuration and compiler version, and 46 bytes RAM
 (excluding stack space). The C interface consists of 3 to 5 functions,
@@ -50,23 +50,25 @@ configured at the top of the Makefile.
 Other USB projects
 ==================
 
-This software was inspired by two similar USB projects for the AVR:
+This software was inspired by two similar USB projects for the AVR,
+especially the second one:
 
   http://www.cesko.host.sk/IgorPlugUSB/IgorPlug-USB%20(AVR)_eng.htm
   http://www.obdev.at/products/avrusb/index.html
 
-My version has the advantage that you have more freedom over which I/O
-pins to use for the D+ and D- USB signals. You don't need to use bit 0
-for the D+ signal. The only restriction is that both signals should be
-on the same I/O port. When you select a pin for D+ that can also
-generate an interrupt, only two I/O pins are required. The pin-change
-interrupt is deliberately not used, so that it remains available for
-other uses.
-
-Another improvement is that the CRC calculation is faster, because it
-uses a lookup table. A bit-wise calculation turned out to be too slow
-for the USB controller in my laptop. For instance, the obdev code
-worked fine on my desktop computer, but not on my laptop.
+The IgorPlugUSB code and earlier versions of the obdev code had the
+restriction that the D+ signal must be connected to bit 0 of an I/O
+port, in addition to an interrupt input. That means that for devices
+like the ATtiny2313, three I/O pins are required to control the USB bus.
+One of the reasons I wrote USBtiny was to have more freedom over which
+I/O pins to use for the D+ and D- USB signals. The only restriction
+is that both signals should be on the same I/O port. When you select a
+pin for D+ that can also generate an interrupt, only two I/O pins are
+required. Later versions of the obdev code have also removed this
+restriction. The pin-change interrupt is deliberately not used, so
+that it remains available for other uses. Another improvement is an
+optional faster CRC calculation that uses a lookup table to calculate
+4 bits at a time.
 
 Apart from these advantages, I think that my code is more readable and
 easier to configure, but that impression may be caused by a mild form
@@ -74,13 +76,18 @@ of the NIH syndrome that I'm suffering from. In any case, I learned a
 lot about the USB protocol, and writing the interrupt handler was a
 nice puzzle.
 
+The USBtinyISP project is an AVR in-circuit programmer based on USBtiny,
+and is available as a kit:
+
+  http://www.ladyada.net/make/usbtinyisp/
+
 
 Hardware
 ========
 
 The AVR must be clocked with an external 12 MHz crystal. For an
 ATtiny2313, this means that the low fuse byte must be reprogrammed,
-for instance to 0xff. I also recommend to enable the BOD circuit,
+for instance to 0xef. I also recommend to enable the BOD circuit,
 when available. For the ATtiny2313, this means programming the high
 fuse byte to 0xdb (BOD level is 2.7V).
 
@@ -91,8 +98,8 @@ which may be more convenient when you need to interface to 5V
 peripherals. According to the USB specification, a device should not
 be damaged by 5V signals. I've been running the AVR and USB bus at 5V,
 and haven't encounter any problems so far, but I have some reports
-of Viao laptops that do not work with 5V signals. In that case, you
-can reduce the voltage of the USB data signals by adding 3V6 zener
+of PCs and laptops that do not work with 5V signals. In that case,
+you can reduce the voltage of the USB data signals by adding 3V6 zener
 diodes from the data signals to ground.
 
 
@@ -106,14 +113,31 @@ port programmer. Because the most important parallel port signals are
 connected to the DB-25 connecter, the same hardware (with different
 firmware) could be used to control other parallel port devices. That
 is also the reason why I connected the ACK signal to the INT1 pin.
-I didn't bother to put capacitors on the crystal, but they are
-recommended for reliable operation. The software, the schematic and
-a Python test script can be found in the "spi" subdirectory.
+The software, the schematic and a Python test script can be found
+in the "spi" subdirectory.
 
-The circuit may be powered via the diode at pin 14 of the DB-25
-connector to enable reprograming the ATtiny2313 in-system. This
-requires an adaptor cable between another SPI programmer and a DB-25
-male connector with the following connections:
+My AVR parallel port programmer follows the "bsd" design from Brian
+Dean (http://www.bsdhome.com/avrdude/). For safety, I've used series
+resistors in the output signals. The Atmel device is powered by the
+data lines D1-D3, via 220 Ohm resistors. D0 is used to control a LED.
+Here is an ASCII-art version of the schematic:
+
+DB25 male                          ATtiny2313
+---------                          ----------
+18 GND ----------------------+---- 10 GND
+ 2 D0  ---- 330 ---- LED ----+
+ 3 D1  ---- 220 ---+
+ 4 D2  ---- 220 ---+-------------- 20 VCC
+ 5 D3  ---- 220 ---+
+ 7 D5  ---- 1K -------------------  1 /RESET
+ 8 D6  ---- 680 ------------------ 19 SCK
+ 9 D7  ---- 1K ------------------- 17 MOSI
+10 ACK --------------------------- 18 MISO
+
+The USBtiny circuit may be powered via the diode at pin 14 of the
+DB-25 connector to enable reprograming the ATtiny2313 in-system.
+This requires an adaptor cable between another SPI programmer and
+a DB-25 male connector with the following connections:
 
   SPI  DB25
   ---  ----
@@ -130,10 +154,11 @@ AVR. This means that you can send a 32-bit SPI command in a single USB
 packet. In addition, you can read or write up to 255 bytes from/to
 flash or EEPROM in a single control transfer.
 
-The subdirectory "patches" contains a patch for avrdude-5.1 that adds
+The subdirectory "patches" contains a patch for avrdude-5.4 that adds
 support for controlling this SPI converter. The programmer name is
 "usbtiny". You can use the -B option or the "sck" command to specify
 the minimum SCK period in microseconds (range: 1..250, default: 10).
+Native support for USBtiny was added in avrdude version 5.5.
 
 
 USBtiny LIRC compatible IR receiver and LCD controller
@@ -153,13 +178,29 @@ setting the LCD_PRESENT macro in main.c to 0.
 
 I adopted the "IgorPlug-USB" protocol, so that the existing LIRC
 device driver "igorplugusb" could be used without modifications.
-Nevertheless, a patch for lirc-0.8.0 is included in the "patches"
-subdirectory, with the following modifications:
+Nevertheless, patches for lirc-0.8.0 and lirc-0.8.2 are included
+in the "patches" subdirectory, with the following modifications:
 1) An increase of the sample rate from 10 to 100 times per second.
    This is not required, but improves the responsiveness and repeat
    behavior for some remote controls.
 2) A fix from Reinhard Max to get correct gap timings.
-3) A compilation fix for the latest 2.6 Linux kernels.
+3) A compilation fix for the latest 2.6 Linux kernels (lirc-0.8.0).
+
+
+USB AVR programmer and SPI interface
+====================================
+
+The subdirectory "usbtinyisp" contains a modified version of the "spi"
+application, that was adapted for use in the USBtinyISP AVR programmer
+(http://www.ladyada.net/make/usbtinyisp/). The code works for both v1.0
+and v2.0 devices.
+
+
+Template USBtiny application
+============================
+
+The directory "template" contains a minimal template application that
+can be used as a starting point for new USBtiny applications.
 
 
 Tools
@@ -179,14 +220,15 @@ programmer.
 
 I initially used gcc-3.4.3 with the -Os option, which generates
 reasonable compact code. Unfortunately, newer versions like gcc-4.1.0
-generate about 10% more code, and as a result, the application code
+generated about 10% more code, and as a result, the application code
 did not fit in 2K anymore. To make it fit, I had to remove the optional
 vendor and device strings, by undefining the USBTINY_VENDOR_NAME and
-USBTINY_DEVICE_NAME macros.
+USBTINY_DEVICE_NAME macros. Fortunately, code generation has improved
+in later versions such as gcc-4.3.4.
 
-The schematics were created with gschem, which is part of the gEDA
-package. The conversion to Postscript is done with a script that
-invokes gschem non-interactively.
+The schematics were created with gschem, from the geda-gschem package.
+The conversion to Postscript is done with a script that invokes gschem
+non-interactively.
 
 The "util" and application code subdirectories each contain their own
 Makefile. In addition, there is a global Makefile that recursively
@@ -201,18 +243,17 @@ defines a class USBtiny that can be used to communicate with the
 USBtiny firmware. This class is used by the test scripts.
 
 The usbtiny.py module uses a Python wrapper around libusb that is
-generated by "swig". Type "make" to build the wrapper. Of course, you
-need to have swig, libusb and libusb-dev installed on your system.
+generated by "swig". Type "make" to build the wrapper. You need to
+have swig, libusb, libusb-dev and python-dev installed on your system.
 
 Libusb needs appropriate permissions to open a USB device. This means
 that you either have to run the scripts as "root", or you should
 configure the hotplug or udev system to relax the permissions of the
 device file created under /proc/bus/usb/ when the device is plugged
-in. With udev, you can change the permissions by adding a rule like
+in. For instance, you can create a file 99-usbtiny.rules with the
+following content in /etc/udev/rules.d/:
 
-  SUBSYSTEM=="usb_device", MODE="0666" 
-
-to the udev rules in /etc/udev/rules.d/
+  SUBSYSTEM=="usb",ATTR{idVendor}=="1781",ATTR{idProduct}=="0c9f",GROUP="plugdev"
 
 
 License

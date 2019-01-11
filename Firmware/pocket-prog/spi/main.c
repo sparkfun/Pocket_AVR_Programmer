@@ -1,11 +1,10 @@
 // ======================================================================
 // Control a parallel port AVR programmer (avrdude type "bsd") via USB.
 //
-// Copyright (C) 2006 Dick Streefland
+// Copyright 2006-2010 Dick Streefland
 //
 // This is free software, licensed under the terms of the GNU General
 // Public License as published by the Free Software Foundation.
-//
 // ======================================================================
 
 #include <avr/io.h>
@@ -15,10 +14,10 @@ enum
 {
 	// Generic requests
 	USBTINY_ECHO,		// echo test
-	USBTINY_READ,		// read byte
-	USBTINY_WRITE,		// write byte
-	USBTINY_CLR,		// clear bit 
-	USBTINY_SET,		// set bit
+	USBTINY_READ,		// read byte (wIndex:address)
+	USBTINY_WRITE,		// write byte (wIndex:address, wValue:value)
+	USBTINY_CLR,		// clear bit (wIndex:address, wValue:bitno)
+	USBTINY_SET,		// set bit (wIndex:address, wValue:bitno)
 	// Programming requests
 	USBTINY_POWERUP,	// apply power (wValue:SCK-period, wIndex:RESET)
 	USBTINY_POWERDOWN,	// remove power from chip
@@ -28,40 +27,31 @@ enum
 	USBTINY_FLASH_WRITE,	// write flash (wIndex:address, wValue:timeout)
 	USBTINY_EEPROM_READ,	// read eeprom (wIndex:address)
 	USBTINY_EEPROM_WRITE,	// write eeprom (wIndex:address, wValue:timeout)
-	USBTINY_DDRWRITE,        // set port direction
-	USBTINY_SPI1            // a single SPI command
 };
 
 // ----------------------------------------------------------------------
 // Programmer output pins:
 //	LED	PB0	(D0)
-#define LED PB0
 //	VCC	PB1	(D1)
 //	VCC	PB2	(D2)
 //	VCC	PB3	(D3)
-//	RESET	PB5	(D4)
-#define RESET PB4
-//	MOSI	PB5	(D5)
-#define MOSI  PB5
-//	SCK	PB7	(D7)
-#define SCK   PB7
-
+//	RESET	PB5	(D5)
+//	SCK	PB6	(D6)
+//	MOSI	PB7	(D7)
 // ----------------------------------------------------------------------
 #define	PORT		PORTB
 #define	DDR		DDRB
-#define	POWER_MASK	_BV(LED)
-#define	RESET_MASK	_BV(RESET)
-#define	SCK_MASK	_BV(SCK)
-#define	MOSI_MASK	_BV(MOSI)
-#define LED_MASK        _BV(LED)
+#define	POWER_MASK	0x0f
+#define	RESET_MASK	(1 << 5)
+#define	SCK_MASK	(1 << 6)
+#define	MOSI_MASK	(1 << 7)
 
 // ----------------------------------------------------------------------
 // Programmer input pins:
-//	MISO	PB6
-#define MISO       6
+//	MISO	PD3	(ACK)
 // ----------------------------------------------------------------------
-#define	PIN		PINB
-#define	MISO_MASK	_BV(MISO)
+#define	PIN		PIND
+#define	MISO_MASK	(1 << 3)
 
 // ----------------------------------------------------------------------
 // Local data
@@ -79,7 +69,7 @@ static	byte_t		res[4];		// SPI result buffer
 // Delay exactly <sck_period> times 0.5 microseconds (6 cycles).
 // ----------------------------------------------------------------------
 __attribute__((always_inline))
-static	void	delay ( void )
+static	inline	void	delay ( void )
 {
 	asm volatile(
 		"	mov	__tmp_reg__,%0	\n"
@@ -93,15 +83,15 @@ static	void	delay ( void )
 // ----------------------------------------------------------------------
 // Issue one SPI command.
 // ----------------------------------------------------------------------
-static	void	spi ( byte_t* cmd, byte_t* res, int i )
+static	void	spi ( byte_t* cmd, byte_t* res )
 {
+	byte_t	i;
 	byte_t	c;
 	byte_t	r;
 	byte_t	mask;
 
-	while (i != 0)
+	for	( i = 0; i < 4; i++ )
 	{
-	  i--;
 		c = *cmd++;
 		r = 0;
 		for	( mask = 0x80; mask; mask >>= 1 )
@@ -144,7 +134,7 @@ static	void	spi_rw ( void )
 	}
 	cmd[1] = a >> 9;
 	cmd[2] = a >> 1;
-	spi( cmd, res, 4 );
+	spi( cmd, res );
 }
 
 // ----------------------------------------------------------------------
@@ -164,27 +154,29 @@ extern	byte_t	usb_setup ( byte_t data[8] )
 		return 8;
 	}
 	addr = (byte_t*) (int) data[4];
+	if	( req == USBTINY_READ )
+	{
+		data[0] = *addr;
+		return 1;
+	}
+	if	( req == USBTINY_WRITE )
+	{
+		*addr = data[2];
+		return 0;
+	}
 	bit = data[2] & 7;
 	mask = 1 << bit;
-	if (req == USBTINY_SET) {
-	  PORT |= mask;
-	  return 0;
+	if	( req == USBTINY_CLR )
+	{
+		*addr &= ~ mask;
+		return 0;
 	}
-	if (req == USBTINY_CLR) {
-	  PORT &= ~ mask;
-	  return 0;
+	if	( req == USBTINY_SET )
+	{
+		*addr |= mask;
+		return 0;
 	}
-	if (req == USBTINY_WRITE) {
-	  PORT = data[2];
-	  return 0;
-	}
-	if (req == USBTINY_READ) {
-	  data[0] = PIN;
-	  return 1;
-	}
-	if (req == USBTINY_DDRWRITE) {
-	  DDR = data[2];
-	}
+
 	// Programming requests
 	if	( req == USBTINY_POWERUP )
 	{
@@ -194,17 +186,15 @@ extern	byte_t	usb_setup ( byte_t data[8] )
 		{
 			mask |= RESET_MASK;
 		}
-		PORTD &= ~_BV(4);
-		DDR  = POWER_MASK | RESET_MASK | SCK_MASK | MOSI_MASK;
+		DDR  = 0xff;
 		PORT = mask;
 		return 0;
 	}
 	if	( req == USBTINY_POWERDOWN )
 	{
-	  //PORT |= RESET_MASK;
-		DDR  = 0x00;
+		PORT |= RESET_MASK;
 		PORT = 0x00;
-		PORTD |= _BV(4);
+		DDR  = 0x00;
 		return 0;
 	}
 	if	( ! PORT )
@@ -213,13 +203,8 @@ extern	byte_t	usb_setup ( byte_t data[8] )
 	}
 	if	( req == USBTINY_SPI )
 	{
-	  spi( data + 2, data + 0, 4 );
+		spi( data + 2, data + 0 );
 		return 4;
-	}
-	if	( req == USBTINY_SPI1 )
-	{
-	  spi( data + 2, data + 0, 1 );
-		return 1;
 	}
 	if	( req == USBTINY_POLL_BYTES )
 	{
@@ -283,7 +268,7 @@ extern	void	usb_out ( byte_t* data, byte_t len )
 		cmd[0] ^= 0x60;	// turn write into read
 		for	( usec = 0; usec < timeout; usec += 32 * sck_period )
 		{	// when timeout > 0, poll until byte is written
-		  spi( cmd, res, 4 );
+			spi( cmd, res );
 			r = res[3];
 			if	( r == cmd[3] && r != poll1 && r != poll2 )
 			{
@@ -296,17 +281,11 @@ extern	void	usb_out ( byte_t* data, byte_t len )
 // ----------------------------------------------------------------------
 // Main
 // ----------------------------------------------------------------------
-__attribute__((naked))		// suppress redundant SP initialization
 extern	int	main ( void )
 {
-  PORTD |= _BV(4);
-  DDRD = _BV(6) | _BV(5) | _BV(4); // setup USB pullup, LED pin and buffer select pins to output
-  usb_init();
-  PORTD = _BV(6) | _BV(4); // pull pull-up and buffer disable high
-
-  for	( ;; )
-    {
-      usb_poll();
-    }
-  return 0;
+	usb_init();
+	for	( ;; )
+	{
+		usb_poll();
+	}
 }

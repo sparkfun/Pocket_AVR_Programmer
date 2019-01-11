@@ -2,7 +2,7 @@
 # ======================================================================
 # usbtiny.py - USBtiny interface class
 #
-# Copyright (C) 2006 Dick Streefland
+# Copyright 2006-2010 Dick Streefland
 #
 # This is free software, licensed under the terms of the GNU General
 # Public License as published by the Free Software Foundation.
@@ -32,12 +32,12 @@ class USBtiny:
 					break
 				dev = dev.next
 		if not dev:
-			print 'Cannot find USB device %04x/%04x' % \
+			print 'Cannot find USB device %04x:%04x' % \
 				(vendor, product)
 			sys.exit(1)
 		self.handle = usb_open(dev)
 		if not self.handle:
-			print 'Cannot open USB device %04x/%04x' % \
+			print 'Cannot open USB device %04x:%04x' % \
 				(vendor, product)
 			sys.exit(1)
 	def __del__(self):

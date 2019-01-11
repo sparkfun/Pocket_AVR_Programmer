@@ -1,14 +1,16 @@
 #!/usr/bin/python
 # ======================================================================
 # spi.py - USBtiny/spi test program
+#
+# Copyright 2006-2010 Dick Streefland
 # ======================================================================
 
-import sys, os.path
+import sys, os.path, time
 sys.path[0] = os.path.join(sys.path[0], '../util')
 import usbtiny
 
-vendor	= 0x1964
-product	= 0x0001
+vendor	= 0x1781
+product	= 0x0C9F
 
 # Generic requests
 USBTINY_ECHO		= 0	# echo test
@@ -34,6 +36,7 @@ usage = """Available commands:
 	s <addr> <bit>             - set bit at <addr>
 	U <reset>                  - powerup; set RESET to <reset>
 	D                          - powerdown
+	R                          - powerup; track MISO state with LED
 	C <c1> <c2> <c3> <c4>      - issue SPI command
 	P <p1> <p2>                - set poll bytes
 	f <addr> <count>           - read from flash
@@ -59,7 +62,7 @@ if argc > 4:
 	c3 = int(sys.argv[4], 16)
 if argc > 5:
 	c4 = int(sys.argv[5], 16)
-if  not (argc == 2 and cmd in "tD")\
+if  not (argc == 2 and cmd in "tDR")\
 and not (argc == 3 and cmd in "rU")\
 and not (argc == 4 and cmd in "wcsPfe")\
 and not (argc == 5 and cmd in "FE")\
@@ -87,6 +90,28 @@ elif cmd == 'U':
 	dev.control_in(USBTINY_POWERUP, 20, byte, 0)
 elif cmd == 'D':
 	dev.control_in(USBTINY_POWERDOWN, 0, 0, 0)
+elif cmd == 'R':
+	try:
+		dev.control_in(USBTINY_POWERUP, 20, 1, 0)
+		led = 1
+		while True:
+			# read input PD3 (MISO from target)
+			pind = dev.control_in(USBTINY_READ, 0, 0x30, 1)
+			pd3 = (ord(pind) >> 3) & 1
+			if pd3 != led:
+				# update PB0 output (programmer LED)
+				if pd3:
+					dev.control_in(USBTINY_SET, 0, 0x38, 0)
+				else:
+					dev.control_in(USBTINY_CLR, 0, 0x38, 0)
+				led = pd3
+			time.sleep(0.02)
+	except:
+		pass
+	finally:
+		dev.control_in(USBTINY_POWERUP, 20, 0, 0)
+		time.sleep(0.2)
+		dev.control_in(USBTINY_POWERDOWN, 0, 0, 0)
 elif cmd == 'C':
 	r = dev.control_in(USBTINY_SPI, addr + (byte << 8), c3 + (c4 << 8), 4)
 	if len(r) == 4:

@@ -57,3 +57,92 @@ o Fixed some build problems of the libusb python wrapper, and added
 
 o Made the flash and SRAM sizes configurable in the Makefile.
 
+
+2008-01-16 version 1.4
+
+o Moved the assignment of a new USB device address to the interrupt
+  handler in order to avoid a race condition that sometimes occurred
+  when the PC was rebooted.
+
+o Updated the schematics with zener diodes on the data lines, because
+  some PCs seem to have problems with 5V data signals.
+
+o Changed the USB ids for the "spi" application to the VID/PID pair
+  of the USBtinyISP project (http://www.ladyada.net/make/usbtinyisp/),
+  because these ids are supported by avrdude since version 5.5.
+
+o Avrdude-5.1 patch replaced by new patch for avrdude-5.4.
+
+o New patch for lirc-0.8.2.
+
+o New configuration macro USBTINY_FAST_CRC to switch between two
+  versions of the CRC algorithm: slow & small or fast & large.
+
+o New make target "fuses" to program the low and high fuses.
+
+
+2010-05-29 version 1.5
+
+o Optimized the USB interrupt handler to make the code both faster
+  and smaller (22 bytes). The interrupt handler now also checks for
+  a pending transmission after an ignored packet and decodes it
+  directly without first returning from the interrupt handler.
+
+o Improved the execution speed of both versions of the CRC function.
+  The "slow" version got 25% faster and 4 bytes smaller, while the
+  "fast" version got 50% faster but 8 bytes larger (suggested by
+  Reimar Döffinger).
+
+o Added two new configuration macros:
+  USBTINY_DMINUS_PULLUP - control D- pullup resistor with an I/O pin.
+  USBTINY_USB_OK_LED - turn on a LED when the enumeration succeeded.
+
+o Added new compiler and linker options to reduce the code size.
+
+o Updated the timer input capture interrupt handler of the "ir"
+  application. The inline assembly code didn't work anymore with
+  newer gcc versions, because of changes in the register allocation.
+  The code now works for gcc-4.1.0 and gcc-4.3.4, but it is still
+  fragile.
+
+o Other changes of the "ir" application:
+  - The maximum number of IR data bytes is now 36 instead of 35.
+  - The LED briefly flashes after USB enumeration.
+  - Added power filtering for the TSOP1738 device in the schematic.
+
+o Added a new USBtiny application "usbtinyisp". This is a modified
+  version of the "spi" application, adapted for use in the USBtinyISP
+  AVR programmer (http://www.ladyada.net/make/usbtinyisp/). The code
+  works for both v1.0 and v2.0 devices.
+
+o Added a new template USBtiny application in the "template" subdirectory.
+
+
+2010-11-17 version 1.6
+
+o Fix for avr-gcc version 4.3.5. Because of a new optimization that
+  suppresses part of the startup code when there are no initialized
+  variables in the C code, two variables in usbtiny/int.S were not
+  initialized anymore.
+
+o Fixed incorrect initialization of "inpos" in ir/main.c. This bug
+  didn't affect the LIRC driver igorplugusb because it always uses
+  an offset of zero.
+
+
+2014-05-02 version 1.7
+
+o Changes for new avr-gcc and avr-libc versions:
+  - Use "const" for "PROGMEM" objects.
+  - Use new names for interrupt vectors.
+  - Use "inline" on "__attribute__((always_inline))" functions.
+
+o Added a new configuration macro USBTINY_NO_DATA to control the use of
+  initialized data by USBtiny. When the data section is empty, the code
+  to initialize the data section will be omitted from the startup code.
+  (suggested by William Chops Westfield)
+
+o Added support for transfers larger than 255 bytes through usb_in() by
+  defining USBTINY_CALLBACK_IN as 2 instead of 1. (suggested by Bernhard
+  Roth).
+

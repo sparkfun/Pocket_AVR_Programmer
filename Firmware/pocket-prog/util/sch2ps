@@ -2,7 +2,7 @@
 # ======================================================================
 # sch2ps - Convert gschem schematic to Postscript
 #
-# Copyright (C) 2006 Dick Streefland
+# Copyright 2006-2010 Dick Streefland
 #
 # This is free software, licensed under the terms of the GNU General
 # Public License as published by the Free Software Foundation.
@@ -16,7 +16,7 @@ cat <<EOF > $tmp
 ; Usage: gschem -q -s <script> -o <file>.ps <file>.sch
 (output-orientation "portrait")
 (output-type "limits")
-(output-text "ps")
+;(output-text "ps")
 (gschem-use-rc-values)
 (gschem-print "/dev/null")
 (gschem-exit)
