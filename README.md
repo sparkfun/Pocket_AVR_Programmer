@@ -1,7 +1,7 @@
 Pocket AVR Programmer
 =====================
 
-[![Pocket AVR Programmer](https://dlnmh9ip6v2uc.cloudfront.net/images/products/9/8/2/5/09825-01b.jpg)  
+[![Pocket AVR Programmer](https://cdn.sparkfun.com/assets/parts/3/8/8/5/09825-01b.jpg)  
 *Pocket AVR Programmer (PGM-09825)*](https://www.sparkfun.com/products/9825)
 
 This is a simple to use USB AVR programmer, that works with ATmega168 and ATmega328 and should work well
